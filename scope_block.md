@@ -91,3 +91,5 @@ synchronize(i_mutex : i){
 }
 ````
 but this is only sugar syntax.
+
+The real question now is, how we define where a variable escapes from its context? What is the total value of a variable? We'll discover it in the [next article](total_value.md)
