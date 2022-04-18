@@ -54,3 +54,6 @@ Clearly this issue was born from a bad design of `fun` since their parameters sh
 The first approach is simpler to implement, can be used in not-`final` functions and speeds up compilation, but a lot of legacy code without `scope` attributes won't work with `scope` variables. The second approach allows to call legacy functions but can't be used on virtual functions.
 
 Since virtual functions are a key feature of D we'll consider only the first approach in these articles.
+
+Actually there exists a third approach compatible with 1. but useful for fine adjustments:
+3. Adding the `scope(label)` attribute where *label* is any label. Parameters with `scope(A)` attribute can share any of their references only with local variables (unless they share them to forbidden variables) or other `scope(A)` parameters.
