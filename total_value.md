@@ -71,7 +71,10 @@ In order to test if the code inside a scope block is correct we must apply the f
 
 - If `E` is a variable `b` then `ret(E)={b}`;
 - if `E` is equal to `*F`, `&F`, `++F`, `--F` then `ret(E)=ret(F)`;
-- if `E` is equal to `F.member` where `member` is a member field then `
+- if `E` is any built-in binary operation (`+`, `-`, `*`, `/`, ..) since they don't hold indirection (pointer algebra is forbitten) then `ret(E)={}`;
+- if `E` is equal to `F.member` where `member` is a member field then `ret(E)=ret(F)`;
+- if `E` is equal to `F[G]` or to `F[G1 .. G2]` with `G, G1, G2` convertible to integers and `F` is a static or a dynamic array then `ret(E)=ret(F)`;
+- if `E` is a built-in literal, a struct literal with an empty constructor or a `new` expression with a empty constructor then `ret(F)={}`;
 - if `E` is equal to `F = G` where both `F` and `G` are expressions then
     - if `G` is strongly indirected and `ref(G)` contains a scoped variable then `ret(F)` can't contain any not scoped variable (or an error is issued). Also if `ret(G)` contains a not-scoped variable then all the variables in `ret(F)` are no more considered scoped (since the return type of `G` is strongly indirected) and should issue an error if found inside a `while`, `for` or `foreach` block. In every case we set `ret(E) = ret(F) ∪ ret(G)`;
     - if `G` is not strongly indirected then `ret(E) = ret(F)`.
