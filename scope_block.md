@@ -92,4 +92,35 @@ synchronize(i_mutex : i){
 ````
 but this is only sugar syntax.
 
+The syntax of a (explicit) scoped block is the following
+````
+  ExplScopeBlock:
+    scope BlockStatement
+    scope ( Identifier ) BlockStatement
+````
+a scope block can appear in three different forms:
+- *anonymous scope block*:
+
+    ````d
+    scope {
+    ...
+    }
+    ````
+- *grouped scope blocK*: select a group for the scope block, any variable declared inside an outer scoped block with the same name are considered scoped also in this scope block:
+
+    ````d
+    scope(group){
+    ....
+    }
+    ````
+- *unscope block*: switch to unscoped context:
+
+    ````d
+    scope(global){
+    ....
+    }
+    ````
+
+Variables declared inside a scoped group belongs to that scope and can't be accessed in different scoped groups or in an unscoped setting. 
+
 The real question now is, how we define where a variable escapes from its context? What is the total value of a variable? We'll discover it in the [next article](total_value.md)
