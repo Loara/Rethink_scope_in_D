@@ -1,11 +1,29 @@
 ## Scope function parameters
 Function calls in scoped blocks are a delicate argument, so we discuss it in a separate document. Consider any expression `E` in the form `f(E1, E2, ..., En)` with `ret(Ei)` well defined, we want to determine if expression `E` is valid inside a scope block.
 
-At this moment we don't use the `return scope` function attribute, so functions can't return any `scope` parameter. A function `f` is called *ref-free* if and only if at least one of these conditions are satisfied:
+Let `f` a classical function with parameters `(p1, p2, ..., pn)` we say `pi` *grabs references* if and only if `pi` is `ref` or `pi` has indirected type. Take now an expression `E` in the form `f(E1, E2, ..., En)` we define these *references sets*:
+- the *global set* defined as
 
-1. `f` doesn't return references, in other words `f` is not a `ref` function and its return type is directed;
-2. `f` is `pure` and every parameter `p` of `f` is not `ref`, `in` or `out` and its type is directed.
+    ````
+    grset(E) = ∪ { i | pi grabs references, pi not scoped }
+    ````
+    
+- the *scoped set* defined as
 
-If `f` is ref-free then `ret(E)={}` always, otherwise we set `ret(E)={global}`.
+    ````
+    srset(E) = ∪ { i | pi grabs references, pi scoped }
+    ````
+    
+and the following *homogeneity rules* should be satisfied:
+1. for every `i, j ∈ srset(E)` we get either `pi` is `const` or we can ref transfer from `Ej` to `Ei` strictly (without reallocations);
+2. for every `i, j ∈ grset(E)` we get either `pi` is `const` or we can ref transfer from `Ej` to `Ei`;
+3. if `f` is not `pure` then for every `i ∈ grset(E)` and every `a ∈ ret(Ei)` we should get `ind(a) = -1` in order to avoid reference escape.
 
-This page is just a draft. Updates will arrive soon.
+If `f` hasn't any `return scope` parameter then we get
+````
+ret(E) = ∪ { ret(E_i) | i ∈ grset(E) }
+````
+if `f` is `pure` otherwise
+````
+ret(E) = ∪ { ret(E_i) | i ∈ grset(E) } ∪ { global }
+````
