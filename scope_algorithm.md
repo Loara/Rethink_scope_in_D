@@ -33,7 +33,7 @@ The algorithm to be applied to each statement `E` is the following:
 - if `E` is in the form `ref T f = F` then we work as the preceding two points but we consider weakly indirection instead of strongly indirection;
 - if `E` is in the form `return F` then we must evaluate the declaration `ret_type _ret = F` with `ind(_ret)=-1`. 
 
-Rules for functions and constructors are explained in following articles.
+Rules for functions and constructors are explained in [following articles](scope_fun.md).
 
 ### Ref transfer
 Given two expressions `E` and `F` with `ret(E)` and `ret(F)` well defined. The *ref transfer* from `F` to `E` is an algorithm used for example in assigments like `E = F` where we want to transfer references from `F` to `E`. You can apply it by following these steps:
