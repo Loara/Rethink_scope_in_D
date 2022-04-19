@@ -15,8 +15,8 @@ Let `f` a classical function with parameters `(p1, p2, ..., pn)` we say `pi` *gr
     ````
     
 and the following *homogeneity rules* should be satisfied:
-1. for every `i, j ∈ srset(E)` we get either `pi` is `const` or we can ref transfer from `Ej` to `Ei` strictly (without reallocations);
-2. for every `i, j ∈ grset(E)` we get either `pi` is `const` or we can ref transfer from `Ej` to `Ei`;
+1. for every `i, j ∈ srset(E)` we get either `pi` is `const`/`immutable` (since `const` is transitive) or we can ref transfer from `Ej` to `Ei` strictly (without reallocations);
+2. for every `i, j ∈ grset(E)` we get either `pi` is `const`/`immutable` or we can ref transfer from `Ej` to `Ei`;
 3. if `f` is not `pure` then for every `i ∈ grset(E)` and every `a ∈ ret(Ei)` we should get `ind(a) = -1` in order to avoid reference escape.
 
 If `f` hasn't any `return scope` parameter then we get
