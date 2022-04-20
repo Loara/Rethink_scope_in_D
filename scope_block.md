@@ -64,9 +64,9 @@ ma.add_ref();
   //since the total value of ma is bounded to this scope
   //global_a = ma;
 ````
-In the preceding example we define a scoped variable `ma` inside the grouped scope with name `group`, the `scope_class` template (`@trusted`) function just temporally changes the scope of `a` from `global` to `group` in order to allow to be assigned to a `group` scoped variable. Now references of objects in the total value of `ma` can be retrived only by variables inside the `group` scope.
+In the preceding example we define a scoped variable `ma` inside the grouped scope with name `"group"`, the `scope_class` template function just temporally changes the scope of `a` from `global` to `"group"` in order to allow to be assigned to a `"group"` scoped variable (it may be defined as `@system` in order to implement safer interfaces). Now references of objects in the total value of `ma` can be retrived only by variables inside the `group` scope.
 
-The `scope` attribute can be used also without specify a group name, in that case a unnamed grouped scope is created containing only these variables. For example
+The `scope` attribute can be used also without specify a group name, in that case the predefined empty gropu name `""` is used. For example
 ```` d
 //Global scope
 shared(int) i;
@@ -96,7 +96,7 @@ synchronized(i_mutex : i){
 ````
 but this is only sugar syntax.
 
-We could also introduce *scope blocks* in order to automatically make declared variables inside it `scope`:
+We could also introduce *scope blocks* in order to automatically make any declared variables inside it `scope`:
 
 ````d
 int a;//Not scoped
@@ -109,6 +109,8 @@ scope(A){
   scope(B){
     ulong c;//it's scope(B) not scope(A)
   }
+  
+  byte bbb;// scope(A)
   
   scope{
     char d;//it's scope but not scope(A)
