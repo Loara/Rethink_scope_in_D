@@ -1,29 +1,23 @@
 ## Scope function parameters
-Function calls in scoped blocks are a delicate argument, so we discuss it in a separate document. Consider any expression `E` in the form `f(E1, E2, ..., En)` with `ret(Ei)` well defined, we want to determine if expression `E` is valid inside a scope block.
+Function calls in scoped blocks are a delicate argument, so we discuss it here and not in the preceding article. Consider any expression `E` in the form `f(E1, E2, ..., En)` with `f` a classical function (not member, nested or delegate) with parameters `(p1, p2, ..., pn)`, we want to determine if expression `E` is valid inside a scope block.
 
-Let `f` a classical function with parameters `(p1, p2, ..., pn)` we say `pi` *grabs references* if and only if `pi` is `ref` or `pi` has indirected type. Take now an expression `E` in the form `f(E1, E2, ..., En)` we define these *references sets*:
-- the *global set* defined as
+Function parameter `pi` is said to *grab references* if and only if `pi` is `ref` or `pi` has indirected type. Since function parameters can be declared `scope` we can define `ind(pi)` as in the preceding article. We define also an equivalence relation `~` between such parameters in the following way: we say `pi ~ pj` if and only if at least one of these sentences is true:
+- `i == j`;
+- both `pi` and `pj` grab references and `ind(pi) == ind(pj)`.
 
-    ````
-    grset(E) = ∪ { i | pi grabs references, pi not scoped }
-    ````
-    
-- the *scoped set* defined as
+So expression `E` equal to `f(E1, E2, ..., En)` is valid if and only if these conditions are satisfied:
+1. for every `i, j` such that `pi ~ pj` we get that or at least one of `ret(Ei)` and `ret(Ej)` is empty or `ret(Ei) == ret(Ej)`;
+2. if `f` is not `pure` then for every `i` such that `pi` grabs references and `ind(pi) == "0"` we get `ret(Ei)` empty or equal to `{ "0" }`. 
 
-    ````
-    srset(E) = ∪ { i | pi grabs references, pi scoped }
-    ````
-    
-and the following *homogeneity rules* should be satisfied:
-1. for every `i, j ∈ srset(E)` we get either `pi` is `const`/`immutable` (since `const` is transitive) or we can ref transfer from `Ej` to `Ei` strictly (without reallocations);
-2. for every `i, j ∈ grset(E)` we get either `pi` is `const`/`immutable` or we can ref transfer from `Ej` to `Ei`;
-3. if `f` is not `pure` then for every `i ∈ grset(E)` and every `a ∈ ret(Ei)` we should get `ind(a) = -1` in order to avoid reference escape.
+Functions can have attribute `retscope(s)` (`scope` attribute  in order to force returning only references inside the `s` scope group, attribute `retscope` is equivalent to `retscope("")` and if it's not present then `retscope("0")` is used implicitly. Now we can explain how to check `return` statement:
 
-If `f` hasn't any `return scope` parameter then we get
-````
-ret(E) = ∪ { ret(E_i) | i ∈ grset(E) }
-````
-if `f` is `pure` otherwise
-````
-ret(E) = ∪ { ret(E_i) | i ∈ grset(E) } ∪ { global }
-````
+- if statement `E` defined inside the body of function `f` is in the form `return F`, `f` has attribute `retscope(s)` (explicitly or implicitly) and its return type is
+
+    - strongly indirected if `f` is not `ref`;
+    - weakly indirected if `f` is `ref`,
+ 
+  then `E` is valid if and only if `ret(F)` is empty or `ret(F) == { s }`.
+
+Currently we don't make any assumption on `throw` statements.
+
+Member functions, nested functions, lambdas and any other delegate can be treat as normal functions by adding hidden parameters.
