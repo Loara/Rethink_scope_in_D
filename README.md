@@ -1,18 +1,36 @@
 # Rethink_scope_in_D
-## Bad documentation
+## Index
+- [Why at this moment scope is not a clear concept](README.md)
+- [Total value and scope blocks](total_value.md)
+- [Validation of scoped code](scope_algorithm.md)
+- [Validation of scoped functions](scope_fun.md)
+## Why at this moment scope is not a clear concept
 Since DIP1000 the life of `scope` attribute hasn't been easy. It was introduced firstly in order to implement RAII (Resource Acquisition Is Initialization) and stack allocation of classes (and maybe to please a lot of C++ nostalgic). The idea of a `scope`d variable is simple: they *cannot escape the current scope in which they're defined*, at least as explained in [this page](https://dlang.org/spec/function.html#scope-parameters) of dlang documentation. 
 
 But in [this other page](https://dlang.org/spec/attribute.html#scope) `scope` associated to local variables simply states that its destructor should be called and memory released when its scope ends. This in particular implies that scope variables can't escape their scope but it's still possible to write code in the following way:
 ```` d
 scope int *a;
 {
-  scope int *b = stack_allocate(1);
+  scope int *b = stack_allocate!int(1);
   a = b;
 }
 ...
 writeln(a);
 ````
-the assignment is tecnically correct since both `a` and `b` are `scope` variables, whereas they belongs to different scopes. A more destructive example and source of bugs in manual memory managment is the following example
+if we follow only the [documentation page](https://dlang.org/spec/attribute.html#scope) the assignment is correct since both `a` and `b` are `scope` variables, but the compiler correctly triggers an error since we're trying to "escape `b`'s reference" outside its scope to `a`, but this code
+````d
+scope int *a;
+{
+  scope int **b = stack_allocate!(int *)();
+  *b = stack_allocate!int(1);
+  a = *b;
+}
+...
+writeln(a);
+````
+compiles since `scope` is not transitive, so it only protects the "first reference order" of a variable.
+
+A more destructive example and source of bugs in manual memory managment is the following example
 ```` d
 class A{
   int t;
@@ -49,7 +67,7 @@ if this code compiles then we may get many runtime errors and segmentation fault
     str = p;//Error: p escapes from function set since this.str is not scope
   }
 ````
-(notice that `scope` function, not `scope` function parameters, are not documented in [member function attributes](https://dlang.org/spec/class.html#member-functions) page but they can be used anyway) but in this way we've made `set` completely useless, why we have to define a `set` function if we can't use it to set a member?
+(notice that `scope` function, not `scope` function parameters, are not documented in [member function attributes](https://dlang.org/spec/class.html#member-functions) but the compiler interpret it as `scope this` parameter) but in this way we've made `set` completely useless, why we have to define a `set` function if we can't use it to set a member?
 
 Notice also that this we exchange `b` with `a` the resulting code in now safe:
 ```` d
