@@ -20,7 +20,7 @@ Functions can have attribute `retscope(s)` (`scope` attribute  in order to force
     if `s` is not equal to `"0"` or `f` is `pure`, otherwise
     
     ````
-    ret(E) = ∪ { ret(Ei) | pi grabs references, ind(pi) == s} ∪ { "0" }
+    ret(E) = ∪ { ret(Ei) | pi grabs references, ind(pi) == "0"} ∪ { "0" }
     ````
 
 
@@ -28,8 +28,8 @@ Now we can explain how to check `return` statement:
 
 - if statement `E` defined inside the body of function `f` is in the form `return F`, `f` has attribute `retscope(s)` (explicitly or implicitly) and its return type is
 
-    - strongly indirected if `f` is not `ref`;
-    - weakly indirected if `f` is `ref`,
+    - indirected if `f` is not `ref`;
+    - any if `f` is `ref`,
  
   then `E` is valid if and only if `ret(F)` is empty or `ret(F) == { s }`.
 
