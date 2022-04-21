@@ -1,17 +1,20 @@
 ## Scoped expressions
 In this section we divide all variables into two groups:
 1. **Global variables** are module variables and static variables defined anywhere;
-2. **Local variables** are function parameters and variables defined inside functions or code blocks.
+2. **Local variables** are function parameters and variables defined inside functions or code blocks;
+3. **Depending variables** are member variables and outer variables accessed via a `this` pointer in general.
 
-Member variables are not considered since they depends by an object reference. Now given an expression `E` we says it's a *strongly indirected expression* if and only if its return type is indirected, we says it's instead *weakly indirected* if it's strongly indirected or it's an lvalue (see [documentation](https://dlang.org/spec/expression.html#.define-lvalue)) of any type. An expression not weakly indirected is said to be *directed*.
+*Only local variables can be defined as* `rscope`, member variables may inherit it from the outer class reference.
 
-In order to scan a `@safe` function body in order to validate `scope` correctness you can follow this algorithm. First to all for every identifier `group` we define `sset("group")` the set of all local variables `a` declared as `scope("group")`, conversely for every `a` local or global variable we define `ind(a)` equal to string `"group"` if and only if `a ∈ sset("group")` otherwise `ind(a) = "0"`. A valiable `a` is *scoped* if and only if `ind(a) != "0"`.
+Now given an expression `E` we says it's a *strongly indirected expression* if and only if its return type is `void` or indirected, we says it's instead *weakly indirected* if it's strongly indirected or it's an lvalue (see [documentation](https://dlang.org/spec/expression.html#.define-lvalue)) of any type. An expression not weakly indirected is said to be *directed*.
+
+In order to scan a `@safe` function body in order to validate `rscope` correctness you can follow this algorithm. First to all for every local or global variable `a` we define `ind(a)` equal to string `"s"`, where `s` is an identifier, if and only if `a` is local and is declared as `rscope(s)` (if `a` is declared as `rscope` then `ind(a) = ""`) and `ind(a) = "0"` in other cases, since an identifier can't begin with a number. We don't need to define `ind` on depending variables.
 
 For every expression `E` is an expression we should define also `ret(E)` as the minimal set of strings `s` such that the return type of `E` could hold a reference of a variable inside `sset(s)`. Let two sets `A`, `B` we write `A ~ B` if and only if `A == B` or at least one of `A` or `B` is empty.
 
 The algorithm to be applied to each statement `E` is the following:
-- if `E` is a variable expression `b` then `ret(E)={ ind(b) }`;
-- if `E` is equal to `(F)`, `*F`, `&F`, `++F`, `--F` or `cast(T) F` then `ret(E)=ret(F)`;
+- if `E` is a (local or global) variable expression `b` then `ret(E)={ ind(b) }`, if `b` is a depending variable evaluate instead `this.b` or `outer.b`;
+- if `E` is equal to `(F)`, `*F`, `&F`, `++F`, `--F`, `+F` or `cast(T) F` then `ret(E)=ret(F)`;
 - if `E` is any built-in binary operation (`+`, `-`, `*`, `/`, ..) then `ret(E)={}` since they don't hold indirection (pointer algebra is forbitten);
 - if `E` is equal to `F ? G : H` then `ret(E) = ret(G) ∪ ret(H)`;
 - if `E` is equal to `F.member` where `member` is a member field then `ret(E)=ret(F)`;
