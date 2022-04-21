@@ -1,7 +1,7 @@
 ## Scope function parameters
 Function calls in scoped blocks are a delicate argument, so we discuss it here and not in the preceding article. Consider any expression `E` in the form `f(E1, E2, ..., En)` with `f` a classical function (not member, nested or delegate) with parameters `(p1, p2, ..., pn)`, we want to determine if expression `E` is valid inside a scope block.
 
-Function parameter `pi` is said to *grab references* if and only if `pi` is `ref`/`out` (or also `in` see below) or `pi` has indirected type. Since function parameters can be declared `scope` we can define `ind(pi)` as in the preceding article. We define also an equivalence relation `~` between such parameters in the following way: we say `pi ~ pj` if and only if at least one of these sentences is true:
+Function parameter `pi` is said to *grab references* if and only if `pi` is `ref`/`out` (or also `in` see below) or `pi` has indirected type. Since function parameters can be declared `rscope` we can define `ind(pi)` as in the preceding article. We define also an equivalence relation `~` between such parameters in the following way: we say `pi ~ pj` if and only if at least one of these sentences is true:
 - `i == j`;
 - both `pi` and `pj` grab references and `ind(pi) == ind(pj)`.
 
@@ -9,15 +9,21 @@ So expression `E` equal to `f(E1, E2, ..., En)` is valid if and only if these co
 1. for every `i, j` such that `pi ~ pj` we get `ret(Ei) ~ ret(Ej)`;
 2. if `f` is not `pure` then for every `i` such that `pi` grabs references and `ind(pi) == "0"` we get `ret(Ei) ~ { "0" }`. 
 
-Functions can have attribute `retscope(s)` (`scope` attribute  in order to force returning only references inside the `s` scope group, attribute `retscope` is equivalent to `retscope("")` and if it's not present then `retscope("0")` is used implicitly. So if expression `E` equal to `f(E1, E2, ..., En)` is valid and `f` is defined as `retscope(s)` we define `ret(E)` in the following way: 
+Functions can have an additional attribute `transfer(s)`, with `s` identifier, in order to force returning only references inside the `s` scope group. Attribute `transfer` is equivalent to `transfer()` and if it's not present if function declaration then our function will only return references in the `global` scope. So if expression `E` equal to `f(E1, E2, ..., En)` is valid and `f` is defined as `retscope(s)` we define `ret(E)` in the following way: 
 1. if `E` is *not* weakly indirected (it's not `ref` and its return type is directed) then `ret(E) = {}` (empty);
-2. otherwise we get
+2. otherwise if `f` is declared as `transfer(s)` then we get
 
     ````
-    ret(E) = ∪ { ret(Ei) | pi grabs references, ind(pi) == s}
+    ret(E) = ∪ { ret(Ei) | pi grabs references, ind(pi) == "s"}
     ````
     
-    if `s` is not equal to `"0"` or `f` is `pure`, otherwise
+3. otherwise if `f` is pure we get
+
+    ````
+    ret(E) = ∪ { ret(Ei) | pi grabs references, ind(pi) == "0"}
+    ````
+    
+    and if `f` is not `pure`
     
     ````
     ret(E) = ∪ { ret(Ei) | pi grabs references, ind(pi) == "0"} ∪ { "0" }
@@ -26,7 +32,7 @@ Functions can have attribute `retscope(s)` (`scope` attribute  in order to force
 
 Now we can explain how to check `return` statement:
 
-- if statement `E` defined inside the body of function `f` is in the form `return F`, `f` has attribute `retscope(s)` (explicitly or implicitly) and its return type is
+- if statement `E` defined inside the body of function `f` is in the form `return F`, `f` has attribute `transfer(s)` (explicitly or implicitly) and its return type is
 
     - indirected if `f` is not `ref`;
     - any if `f` is `ref`,
@@ -42,9 +48,9 @@ Constructors for type `T` declared as `this(p1, p2, ..., pn) scope(s) @safe` are
 
 Constrictor invocation as `new T(E1, E2, ..., En)` with `T` class is translated to `new_Tfun(E1, E2, ..., En)` where
 ````d
-T allocate_T() retscope @trusted;
+T allocate_T() transfer @trusted;
 
-T new_Tfun(p1, p2, ..., pn) retscope(s) @safe{
+T new_Tfun(p1, p2, ..., pn) transfer(s) @safe{
     scope(s) T ret = allocate_T();
     this_fun(ret, p1, p2, ..., pn);
     return ret;
