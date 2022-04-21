@@ -1,7 +1,8 @@
 # Rethink_scope_in_D
 ## Index
 - [Why at this moment scope is not a clear concept](README.md)
-- [Total value and scope blocks](total_value.md)
+- [Scope blocks](scope_block.md)
+- [Total value](total_value.md)
 - [Validation of scoped code](scope_algorithm.md)
 - [Validation of scoped functions](scope_fun.md)
 ## Why at this moment scope is not a clear concept
