@@ -1,7 +1,7 @@
 ## Scope function parameters
 Function calls in scoped blocks are a delicate argument, so we discuss it here and not in the preceding article. Consider any expression `E` in the form `f(E1, E2, ..., En)` with `f` a classical function (not member, nested or delegate) with parameters `(p1, p2, ..., pn)`, we want to determine if expression `E` is valid inside a scope block.
 
-Function parameter `pi` is said to *grab references* if and only if `pi` is `ref` or `pi` has indirected type. Since function parameters can be declared `scope` we can define `ind(pi)` as in the preceding article. We define also an equivalence relation `~` between such parameters in the following way: we say `pi ~ pj` if and only if at least one of these sentences is true:
+Function parameter `pi` is said to *grab references* if and only if `pi` is `ref`/`out` (or also `in` see below) or `pi` has indirected type. Since function parameters can be declared `scope` we can define `ind(pi)` as in the preceding article. We define also an equivalence relation `~` between such parameters in the following way: we say `pi ~ pj` if and only if at least one of these sentences is true:
 - `i == j`;
 - both `pi` and `pj` grab references and `ind(pi) == ind(pj)`.
 
@@ -50,6 +50,9 @@ T new_Tfun(p1, p2, ..., pn) retscope(s) @safe{
     return ret;
 }
 ````
+
+## Template functions and `auto ref`
+When calling a template function it's considered only the specialization that it's effective called. So if a parameter `pi` with directed type and declared as `auto ref` grabs references if and only if the corresponding argument `Ei` is an lvalue.
 
 ## the `in` problem
 Attribute `in` is defined as `const scope` in order to avoid saving its reference outside the function since it may be destroyed once the function terminates. But since addresses of a `in` parameter may transfer reference (if it's passed by reference) or may not (if passed by value) then a `in` parameter should grab references even if its type is directed.
