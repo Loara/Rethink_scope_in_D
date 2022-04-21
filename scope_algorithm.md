@@ -34,8 +34,8 @@ The reason of requiring `ret(F) ~ ret(G)` is to avoid these results:
 ````d
 int *global;
 ...
-scope{
-    int i = 0; //i scoped
+rscope{
+    int i = 0; //i rscoped
     int **j = &global; //if assigment from global to scoped is valid then this is also valid
     *j = &i; //valid because j is scoped, but now global has i address
 }
@@ -44,12 +44,13 @@ if we make global any variable that *may* hold a reference to a global reference
 ````d
 int *global;
 ...
-scope(int i = 0){//i scoped
-    int *j = true ? &i : global; //since j may hold a global reference it's set inside sset("0")
+rscope{
+    int i = 0;//i scoped
+    int *j = true ? &i : global; //since j may hold a global reference we get ind(j) = "0"
     global = j; //valid but i escapes.
 }
 ````
 
-Scoped variables should not be used as argument in template alias parameters.
+Scoped variables should not be used as argument in template alias parameters or in value template parameters with indirect type.
 
 This list is a draft and may change in successive releases. Any suggestion is welcome.
