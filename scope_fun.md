@@ -41,7 +41,7 @@ Now we can explain how to check `return` statement:
 
 Currently we don't make any assumption on `throw` statements.
 
-Member functions, nested functions, lambdas and any other delegate can be treat as normal functions by adding hidden parameters.
+Member functions can be treated as normal functions by adding hidden parameter `this`. Like `const` and `immutable` a member function can also be declared `rscope(s)` in order to make `this` `rscope`.
 
 ## Constructors
 Constructors for type `T` declared as `this(p1, p2, ..., pn) scope(s) @safe` are validated as `void this_fun(scope(s) ref T this, p1, p2, ..., pn)` if `T` is a struct and `this_fun(scope(s) T this, p1, p2, ..., pn)` if `T` is a class.
@@ -64,3 +64,8 @@ When calling a template function it's considered only the specialization that it
 Attribute `in` is defined as `const scope` in order to avoid saving its reference outside the function since it may be destroyed once the function terminates. But since addresses of a `in` parameter may transfer reference (if it's passed by reference) or may not (if passed by value) then a `in` parameter should grab references even if its type is directed.
 
 If type of a `in` parameter is indirected we don't know if references held by that parameter are destroyed or can be safely stored, so for `in` parameters the current meaning of `scope` should be maintained.
+
+## Nested functions and classes problem
+Nested functions (and classes) can access their context, but if they're defined inside a function how they can access `rscope` local variables since member variables cannot be `rscope`?
+
+The trivial solution is to completely forbid nested entities to access `rscope` variables. Another solution for nested function is the following: if `this` parameter is declared as `rscope(s)` then you can access only variables declared as `rscope(s)`.
