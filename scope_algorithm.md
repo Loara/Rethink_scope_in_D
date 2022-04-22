@@ -10,7 +10,7 @@ Now given an expression `E` we says it's a *strongly indirected expression* if a
 
 In order to scan a `@safe` function body in order to validate `rscope` correctness you can follow this algorithm. First to all for every local or global variable `a` we define `ind(a)` equal to string `"s"`, where `s` is an identifier, if and only if `a` is local and is declared as `rscope(s)` (if `a` is declared as `rscope` then `ind(a) = ""`) and `ind(a) = "0"` in other cases, since an identifier can't begin with a number. We don't need to define `ind` on depending variables.
 
-For every expression `E` is an expression we should define also `ret(E)` as the minimal set of strings `s` such that the return type of `E` could hold a reference of a variable inside `sset(s)`. Let two sets `A`, `B` we write `A ~ B` if and only if `A == B` or at least one of `A` or `B` is empty.
+For every expression `E` is an expression we should define also `ret(E)` as the minimal set of strings `s` such that the return type of `E` could hold a reference of a variable inside `sset(s)`. Let two sets `A`, `B` we write `A ~ B` if and only if at least one of `A` or `B` is empty or `A == B == { s }`.
 
 The algorithm to be applied to each statement `E` is the following:
 - if `E` is a (local or global) variable expression `b` then `ret(E)={ ind(b) }`, if `b` is a depending variable evaluate instead `this.b` or `outer.b`;
