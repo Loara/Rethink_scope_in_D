@@ -5,6 +5,7 @@
 - [Total value](total_value.md)
 - [Validation of scoped code](scope_algorithm.md)
 - [Validation of scoped functions](scope_fun.md)
+- [Clone methods](cloning.md)
 ## Why at this moment scope is not a clear concept
 Since DIP1000 the life of `scope` attribute hasn't been easy. It was introduced firstly in order to implement RAII (Resource Acquisition Is Initialization) and stack allocation of classes (and maybe to please a lot of C++ nostalgic). The idea of a `scope`d variable is simple: they *cannot escape the current scope in which they're defined*, at least as explained in [this page](https://dlang.org/spec/function.html#scope-parameters) of dlang documentation. 
 
