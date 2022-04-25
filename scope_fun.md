@@ -69,3 +69,5 @@ If type of a `in` parameter is indirected we don't know if references held by th
 Nested functions (and classes) can access their context, but if they're defined inside a function how they can access `rscope` local variables since member variables cannot be `rscope`?
 
 The trivial solution is to completely forbid nested entities to access `rscope` variables. Another solution for nested function is the following: if `this` parameter is declared as `rscope(s)` then you can access only variables declared as `rscope(s)`.
+
+[<<Prev](scope_algorithm) [Menu](README.md) [Next>>](cloning.md)
