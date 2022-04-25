@@ -93,3 +93,5 @@ struct A{
 then we would get a compile time error since return object `A(a, b)` was `rscope` (due to `transfer` attribute) but `b` is a reference that doesn't belong to `rscope` (since `clone` was not marked with `rscope`).
 
 So you can use `rscope` in order to control your references.
+
+[<<Prev](scope_fun.md) [Menu](README.md)
