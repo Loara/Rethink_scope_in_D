@@ -122,3 +122,5 @@ rscope(A){
 The real question now is, how we define where a variable escapes from its context? What is the total value of a variable? We'll discover it in the [next article](total_value.md)
 
 **Proposal 2** Instead of defining a new attribute we could simply redefine `scope`, but a lot of legacy code will break.
+
+[<<Prev](README.md) [Menu](README.md) [Next>>](total_value.md)
