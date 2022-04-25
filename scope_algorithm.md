@@ -54,3 +54,5 @@ rscope{
 Scoped variables should not be used as argument in template alias parameters or in value template parameters with indirect type.
 
 This list is a draft and may change in successive releases. Any suggestion is welcome.
+
+[<<Prev](total_value.md) [Menu](README.md) [Next>>](scope_fun.md)
