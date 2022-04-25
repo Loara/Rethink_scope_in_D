@@ -24,3 +24,5 @@ We remember that an *object* in memory can be uniquely identified by its *addres
 So *avoid an object* `a` *to escape from block* `B` means that *inside block* `B` *any operation that stores outside* `B` *any reference to any object inside the total value of* `a`. Think about a `shared` object inside a `synchronized` block with its `shared` attribute casted away, any reference to some object inside its total vamue should not escape outside the `synchronized` block.
 
 The algorithm to validate scoped blocks is developped in [this page](scope_algorithm.md)
+
+[<<Prev](scope_block.md) [Menu](README.md) [Next>>](scope_algorithm.md)
