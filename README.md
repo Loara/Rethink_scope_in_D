@@ -19,7 +19,7 @@ scope int *a;
 ...
 writeln(a);
 ````
-if we follow only the [documentation page](https://dlang.org/spec/attribute.html#scope) the assignment is correct since both `a` and `b` are `scope` variables, but the compiler correctly triggers an error since we're trying to "escape `b`'s reference" outside its scope to `a`, but this code
+if we follow only the [documentation page](https://dlang.org/spec/attribute.html#scope) the assignment is correct since both `a` and `b` are `scope` variables, but the compiler correctly triggers an error since we're trying to "escape `b`'s reference" outside its scope to `a`, ~~but this code~~
 ````d
 scope int *a;
 {
@@ -30,9 +30,9 @@ scope int *a;
 ...
 writeln(a);
 ````
-compiles since `scope` is not transitive, so it only protects the "first reference order" of a variable.
+~~compiles since `scope` is not transitive, so it only protects the "first reference order" of a variable~~.
 
-A more destructive example and source of bugs in manual memory managment is the following example
+A more interesting example and source of bugs in manual memory managment is the following example
 ```` d
 class A{
   int t;
@@ -63,64 +63,31 @@ class B{
   b.set(a)
 }
 ````
-if this code compiles then we may get many runtime errors and segmentation faults since variable `a` is destroyed before `b` but the reference in `b` is not `null`. A simple solution could be force `scope` variables to be used only as `scope` function parameters:
+if this code compiled then we would get many runtime errors and segmentation faults since variable `a` is destroyed before `b` but the reference in `b` is not `null`. But luckly this code doesn't compile since `set` cannot accept `scope` references. Even if we make `set` a `scope` member function
 ```` d
   void set(scope A p) scope{//this is scope too
     str = p;//Error: p escapes from function set since this.str is not scope
   }
 ````
-(notice that `scope` function, not `scope` function parameters, are not documented in [member function attributes](https://dlang.org/spec/class.html#member-functions) but the compiler interpret it as `scope this` parameter) but in this way we've made `set` completely useless, why we have to define a `set` function if we can't use it to set a member?
-
-Notice also that this we exchange `b` with `a` the resulting code in now safe:
-```` d
-{
-  scope A a = new A(3);
-  scope B b = new B();
-  ...
-  b.set(a)
-}
-````
-so:
-- the problem lies into the calling context (since `a` and `b` are in the wrong order);
-- but we can't find the problem unless we investigate inside the called context (`set`'s body).
-
-If we try to compile the following code with `dmd -dip1000`:
-```` d
-import std.stdio;
-
+we get a compile time error since `this.str` is not `scope`.  In some cases but `scope` is "almost transitive", for example this code
+````d
 class A{
-    public int a =3;
+  public this() pure @safe{}
+  public int i = 1;
 }
 
-class B{
-    public A str;
-    void set(scope A p) @safe scope{
-        str = p;
-    }
+int *j;
 
-    ~this() @safe{
-        if(str !is null){
-            writeln(str.a);
-        }
-    }
-}
-
-int main() @safe{
-    scope A a = new A();
-    scope B b = new B();
-
-    b.set(a);
-
-    return 0;
+void main() @safe{
+  scope A a = new A();
+  j = &(a.i);
 }
 ````
-we clearly get the following error
+doesn't compile and on `dmd` this error is issued:
 ````
-main.d(10): Error: scope variable `p` assigned to non-scope `this.str`
+ Error: scope variable `a` assigned to non-scope `j`
 ````
 
-So the `scope` attribute is not what the manual-memory managment fans are waiting, currently the simplest and safest way to manage it is via, drum roll, the *Garbage Collector* (and yes, also reference counting counts as garbage collector, more precisely the dumb brother of the big GC family due to their [poor global performances compared to other solutions](https://en.wikipedia.org/wiki/Reference_counting)).
-
-So the scope attribute as explained in [this page](https://dlang.org/spec/attribute.html#scope) is not so useful, but the idea behind the [scoped function parameters](https://dlang.org/spec/function.html#scope-parameters) is not so bad, rather it can be used in order to introduce a *safe cast mechanism* to perform **shared data synchronization**, but we'll explain it in a [subsequent article](scope_block.md).
+~~So the scope attribute as explained in [this page](https://dlang.org/spec/attribute.html#scope) is not so useful,~~ but the idea behind the [scoped function parameters](https://dlang.org/spec/function.html#scope-parameters) is not so bad, rather it can be used in order to introduce a *safe cast mechanism* to perform **shared data synchronization**, but we'll explain it in a [subsequent article](scope_block.md).
 
 [Next>>](scope_block.md)
